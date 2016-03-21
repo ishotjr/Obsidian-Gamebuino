@@ -26,6 +26,8 @@ Gamebuino gb;
 
 extern const byte font3x3[];
 
+// TODO: optimize types etc.
+
 // Obsidian spacecraft position and size
 int craft_x = LCDWIDTH / 8;
 int craft_y = LCDHEIGHT / 2;
@@ -33,7 +35,10 @@ int craft_size = 4;
 
 // projectile(s) position, size and state
 const int projectiles = 3;
+const int projectile_size_default = 2;
+const int projectile_speed_default = 1;
 int projectileIndex = 0;
+
 int projectile_x[projectiles];
 int projectile_y[projectiles];
 int projectile_size[projectiles];
@@ -77,19 +82,32 @@ void loop() {
 
         projectile_active = true;
         
-        // start in front/center of craft
-        
-        // TODO: find available slot and fill
+        // find available (aka immobile) slot and fill
+        projectileIndex = -1;
+        for (int i = 0; i < projectiles; i++) {
+          if (projectile_speed_x[i] == 0) {
+            projectileIndex = i;
+            break;
+          }
+        }
 
-        projectile_size[projectileIndex] = 2;
-        projectile_speed_x[projectileIndex] = 1;
-        projectile_x[projectileIndex] = craft_x + craft_size;
-        projectile_y[projectileIndex] = craft_y + ((craft_size - projectile_size[projectileIndex]) / 2);
+        if (projectileIndex >= 0) {
+          
+          // launch projectile from front/center of craft with default size and speed
+          projectile_size[projectileIndex] = projectile_size_default;
+          projectile_speed_x[projectileIndex] = projectile_speed_default;
+          projectile_x[projectileIndex] = craft_x + craft_size;
+          projectile_y[projectileIndex] = craft_y + ((craft_size - projectile_size[projectileIndex]) / 2);
 
-        // TODO: this is not really viable once projectiles start hitting things
-        projectileIndex = (projectileIndex + 1) % projectiles;
+          gb.sound.playOK();
+        } else {
+          // turns out we can't shoot, even if we thought we could
+          gb.sound.playCancel();
+        }
         
-        gb.sound.playOK();
+      } else {
+        // can't shoot
+        gb.sound.playCancel();        
       }
     }
     
