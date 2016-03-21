@@ -49,7 +49,14 @@ bool projectile_available = true;
 int baddie_x = (3 * LCDWIDTH) / 4;
 int baddie_y = LCDHEIGHT / 2;
 int baddie_radius = 3;
-bool baddie_active = true;
+int baddie_health_default = 4;
+int baddie_health = baddie_health_default;
+
+int baddie_health_gauge_w = 12;
+int baddie_health_gauge_h = 4;
+int baddie_health_gauge_x = (3 * LCDWIDTH) / 4;
+int baddie_health_gauge_y = 0 + baddie_health_gauge_h;
+
 
 void setup() {
 
@@ -144,12 +151,11 @@ void loop() {
         int baddie_bounds_x_max = baddie_x + baddie_radius;
         int baddie_bounds_y_min = baddie_y - baddie_radius;
         int baddie_bounds_y_max = baddie_y + baddie_radius;
-        if (baddie_active && 
+        if ((baddie_health > 0) && 
           ((projectile_x[i] >= baddie_bounds_x_min) && (projectile_x[i] <= baddie_bounds_x_max)) && 
           ((projectile_y[i] >= baddie_bounds_y_min) && (projectile_y[i] <= baddie_bounds_y_max))) {
           
-            // TODO: update baddie's health vs. one-shot kill
-            baddie_active = false;
+            baddie_health--;
 
             // it's gone - free up slot
             projectile_x[i] = 0;
@@ -172,14 +178,20 @@ void loop() {
     }
 
     // quick test of what shooting baddie w/b like
-    if (baddie_active) {
+    if (baddie_health > 0) {
       gb.display.fillCircle(baddie_x, baddie_y, baddie_radius);
     } else {
-      // respawn after 15s (approx, based on 20fps)
+      // respawn every 15s (approx, based on 20fps)
+      // TODO: something better, e.g. relative to death time?
       if (gb.frameCount % 300 == 0) {
-        baddie_active = true;
-        }
+        baddie_health = baddie_health_default;
+      }
     }
+
+    // baddie health gauge
+    gb.display.drawRect(baddie_health_gauge_x, baddie_health_gauge_y, baddie_health_gauge_w, baddie_health_gauge_h);
+    gb.display.fillRect(baddie_health_gauge_x, baddie_health_gauge_y, 
+      (baddie_health_gauge_w * baddie_health) / baddie_health_default, baddie_health_gauge_h);
 
     // display CPU load during dev
     gb.display.setFont(font3x3);
