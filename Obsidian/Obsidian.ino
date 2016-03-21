@@ -46,6 +46,11 @@ int projectile_speed_x[projectiles];
 bool projectile_active = false;
 bool projectile_available = true;
 
+int baddie_x = (3 * LCDWIDTH) / 4;
+int baddie_y = LCDHEIGHT / 2;
+int baddie_radius = 3;
+bool baddie_active = true;
+
 void setup() {
 
   gb.begin();
@@ -132,20 +137,48 @@ void loop() {
           gb.display.fillRect(projectile_x[i], projectile_y[i], projectile_size[i], projectile_size[i]);
         }
         
-        // continue forward to edge of screen
-        // TODO: collision w/ enemy!
+        // is projectile colliding with baddie? (if it's there)
+        // TODO: update to use actual circle vs. giant box,
+        // and entire projectile vs. just single point
+        int baddie_bounds_x_min = baddie_x - baddie_radius;
+        int baddie_bounds_x_max = baddie_x + baddie_radius;
+        int baddie_bounds_y_min = baddie_y - baddie_radius;
+        int baddie_bounds_y_max = baddie_y + baddie_radius;
+        if (baddie_active && 
+          ((projectile_x[i] >= baddie_bounds_x_min) && (projectile_x[i] <= baddie_bounds_x_max)) && 
+          ((projectile_y[i] >= baddie_bounds_y_min) && (projectile_y[i] <= baddie_bounds_y_max))) {
+          
+            // TODO: update baddie's health vs. one-shot kill
+            baddie_active = false;
 
-        if (projectile_x[i] < LCDWIDTH) {
-          projectile_x[i] += projectile_speed_x[i];
+            // it's gone - free up slot
+            projectile_x[i] = 0;
+            projectile_speed_x[i] = 0;
+            projectile_available = true;
+
         } else {
-          // it's gone - free up slot
-          projectile_x[i] = 0;
-          projectile_speed_x[i] = 0;
-          projectile_available = true;
+          // continue forward to edge of screen
+          if (projectile_x[i] < LCDWIDTH) {
+            projectile_x[i] += projectile_speed_x[i];
+          } else {
+            // it's gone - free up slot
+            projectile_x[i] = 0;
+            projectile_speed_x[i] = 0;
+            projectile_available = true;
+          }
         }
-        
       } 
     
+    }
+
+    // quick test of what shooting baddie w/b like
+    if (baddie_active) {
+      gb.display.fillCircle(baddie_x, baddie_y, baddie_radius);
+    } else {
+      // respawn after 15s (approx, based on 20fps)
+      if (gb.frameCount % 300 == 0) {
+        baddie_active = true;
+        }
     }
 
     // display CPU load during dev
