@@ -46,16 +46,17 @@ int projectile_speed_x[projectiles];
 bool projectile_active = false;
 bool projectile_available = true;
 
-int baddie_x = (3 * LCDWIDTH) / 4;
+int baddie_x = (7 * LCDWIDTH) / 8;
 int baddie_y = LCDHEIGHT / 2;
 int baddie_radius = 3;
+int baddie_speed_y = 1;
 int baddie_health_default = 4;
 int baddie_health = baddie_health_default;
 
 int baddie_health_gauge_w = 12;
 int baddie_health_gauge_h = 4;
-int baddie_health_gauge_x = (3 * LCDWIDTH) / 4;
-int baddie_health_gauge_y = 0 + baddie_health_gauge_h;
+int baddie_health_gauge_x = (3 * LCDWIDTH) / 5;
+int baddie_health_gauge_y = 1;
 
 
 void setup() {
@@ -188,6 +189,13 @@ void loop() {
       }
     }
 
+    // move baddie
+    baddie_y = baddie_y + baddie_speed_y;
+    // TODO: incorporate baddie size1
+    if (((baddie_y + baddie_radius) > LCDHEIGHT) || ((baddie_y - baddie_radius) < 0)) {
+      baddie_speed_y = baddie_speed_y * -1;
+    }
+
     // baddie health gauge
     gb.display.drawRect(baddie_health_gauge_x, baddie_health_gauge_y, baddie_health_gauge_w, baddie_health_gauge_h);
     gb.display.fillRect(baddie_health_gauge_x, baddie_health_gauge_y, 
@@ -195,7 +203,7 @@ void loop() {
 
     // display CPU load during dev
     gb.display.setFont(font3x3);
-    gb.display.cursorX = LCDWIDTH - (8 * 4);
+    gb.display.cursorX = 0; //LCDWIDTH - (8 * 4);
     gb.display.cursorY = LCDHEIGHT - 4;
     gb.display.print(F("CPU:"));
     gb.display.print(gb.getCpuLoad());
