@@ -166,6 +166,9 @@ void loop() {
     
     
     // update craft position
+#ifdef GB_META
+    gb.display.setColor(GRAY);
+#endif
     gb.display.fillRect(craft_x, craft_y, craft_size, craft_size);
 
     // update projectile(s) position - skip if none active
@@ -177,6 +180,9 @@ void loop() {
 
         // ignore if immobile (?)
         if (projectile_speed_x[i] > 0) {
+#ifdef GB_META
+          gb.display.setColor(PURPLE);
+#endif
           gb.display.fillRect(projectile_x[i], projectile_y[i], projectile_size[i], projectile_size[i]);
         }
         
@@ -215,6 +221,9 @@ void loop() {
 
     // quick test of what shooting baddie w/b like
     if (baddie_health > 0) {
+#ifdef GB_META
+      gb.display.setColor(PINK);
+#endif
       gb.display.fillCircle(baddie_x, baddie_y, baddie_radius);
     } else {
       // respawn every 15s (approx, based on 20fps)
@@ -232,14 +241,33 @@ void loop() {
     }
 
     // baddie health gauge
+#ifdef GB_META
+    gb.display.setColor(LIGHTBLUE);
+#endif
     gb.display.drawRect(baddie_health_gauge_x, baddie_health_gauge_y, baddie_health_gauge_w, baddie_health_gauge_h);
+#ifdef GB_META
+    if (baddie_health <= (baddie_health_default / 4)) {
+      gb.display.setColor(RED);
+    } else if (baddie_health <= (baddie_health_default / 2)) {
+      gb.display.setColor(YELLOW);
+    } else {
+      gb.display.setColor(GREEN);
+    }
+      
+#endif
     gb.display.fillRect(baddie_health_gauge_x, baddie_health_gauge_y, 
       (baddie_health_gauge_w * baddie_health) / baddie_health_default, baddie_health_gauge_h);
 
     // display CPU load during dev
-    gb.display.setFont(font3x3);
     gb.display.cursorX = 0; //LCDWIDTH - (8 * 4);
+#ifdef GB_META
+    gb.display.cursorY = LCDHEIGHT - 6;
+    // default META font is 3x5
+    gb.display.setColor(DARKGRAY);
+#else
     gb.display.cursorY = LCDHEIGHT - 4;
+    gb.display.setFont(font3x3);
+#endif
     gb.display.print(F("CPU:"));
     gb.display.print(gb.getCpuLoad());
     gb.display.print(F("%"));
