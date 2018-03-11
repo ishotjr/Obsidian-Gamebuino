@@ -15,14 +15,32 @@
  * -----------------------------------------------------------------------------
  *
  * 0.1 - initial Gamebuino PoC
+ * 0.1m - initial Gamebuino META PoC
  * 
  * -----------------------------------------------------------------------------
  *
  */
  
 #include <SPI.h>
+
+// TODO: not sure if a "real" solution like this exists?
+#define GB_META
+#ifdef GB_META
+#include <Gamebuino-Meta.h>
+
+// this is a silly way to get quick META compatibility for now
+#define LCDWIDTH gb.display.width()
+#define LCDHEIGHT gb.display.height()
+#define BTN_UP BUTTON_UP
+#define BTN_DOWN BUTTON_DOWN
+#define BTN_A BUTTON_A
+#define BTN_C BUTTON_MENU
+
+#else
 #include <Gamebuino.h>
 Gamebuino gb;
+#endif
+
 
 extern const byte font3x3[];
 
@@ -62,14 +80,24 @@ int baddie_health_gauge_y = 1;
 void setup() {
 
   gb.begin();
+
+#ifndef GB_META
+  // CLASSIC only
+  
   // remember to use F() for strings in order to save RAM!
   gb.titleScreen(F("Obsidian"));
+#endif
 
 }
 
 void loop() {
   
   if (gb.update()) {
+
+#ifdef GB_META
+    // META requires explicit clear at beginning of loop
+    gb.display.clear();
+#endif
 
     // process inputs
 
@@ -126,7 +154,14 @@ void loop() {
     
     // quit
     if (gb.buttons.pressed(BTN_C)) {
+#ifdef GB_META
+      // TODO: re-init?
+#else
+      // CLASSIC only
+      
+      // remember to use F() for strings in order to save RAM!
       gb.titleScreen(F("Obsidian"));
+#endif
     }
     
     
